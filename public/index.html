@@ -1,0 +1,82 @@
+k<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>خدمة كفيل - Docker مع MongoDB</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+  </head>
+  <body class="bg-gradient-to-br from-blue-50 to-indigo-100 text-center flex flex-col items-center min-h-screen p-4">
+    <div class="bg-white p-8 rounded-3xl shadow-2xl max-w-2xl w-full mt-8">
+      <h1 class="text-4xl font-bold text-indigo-600 mb-4 flex items-center justify-center">
+        <i class="fas fa-docker text-blue-500 mr-2"></i> خدمة كفيل - Docker مع MongoDB
+      </h1>
+      <p class="text-gray-600 mb-6">تطبيق Node.js + MongoDB يعمل داخل حاويات Docker! مثال لخدمتي على كفيل.</p>
+
+      <!-- زر الرسالة -->
+      <button id="fetchBtn" class="bg-green-500 hover:bg-green-600 text-white py-3 px-6 rounded-lg font-semibold transition duration-300 mb-6">
+        <i class="fas fa-envelope mr-2"></i> احصل على رسالة
+      </button>
+      <div id="output" class="mt-4 text-green-600 font-semibold bg-green-50 p-3 rounded-lg"></div>
+
+      <!-- نموذج إضافة مستخدم -->
+      <h2 class="text-2xl font-bold text-gray-800 mt-8 mb-4">أضف مستخدم جديد</h2>
+      <form id="userForm" class="space-y-4">
+        <input type="text" id="name" placeholder="الاسم" class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500" required>
+        <input type="email" id="email" placeholder="البريد الإلكتروني" class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500" required>
+        <button type="submit" class="bg-indigo-500 hover:bg-indigo-600 text-white py-3 px-6 rounded-lg font-semibold transition duration-300 w-full">
+          <i class="fas fa-plus mr-2"></i> أضف المستخدم
+        </button>
+      </form>
+
+      <!-- قائمة المستخدمين -->
+      <h2 class="text-2xl font-bold text-gray-800 mt-8 mb-4">قائمة المستخدمين</h2>
+      <button id="loadUsers" class="bg-purple-500 hover:bg-purple-600 text-white py-3 px-6 rounded-lg font-semibold transition duration-300 mb-4">
+        <i class="fas fa-users mr-2"></i> تحميل المستخدمين
+      </button>
+      <div id="usersList" class="space-y-2"></div>
+    </div>
+
+    <script>
+      // زر الرسالة
+      document.getElementById('fetchBtn').addEventListener('click', async () => {
+        const res = await fetch('/api/message');
+        const data = await res.json();
+        document.getElementById('output').innerText = data.message;
+      });
+
+      // نموذج إضافة مستخدم
+      document.getElementById('userForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const name = document.getElementById('name').value;
+        const email = document.getElementById('email').value;
+        const res = await fetch('/users', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name, email })
+        });
+        if (res.ok) {
+          alert('تم إضافة المستخدم بنجاح!');
+          document.getElementById('userForm').reset();
+        } else {
+          alert('خطأ في الإضافة');
+        }
+      });
+
+      // تحميل المستخدمين
+      document.getElementById('loadUsers').addEventListener('click', async () => {
+        const res = await fetch('/users');
+        const users = await res.json();
+        const list = document.getElementById('usersList');
+        list.innerHTML = '';
+        users.forEach(user => {
+          const div = document.createElement('div');
+          div.className = 'bg-gray-50 p-3 rounded-lg border';
+          div.innerHTML = `<strong>${user.name}</strong> - ${user.email}`;
+          list.appendChild(div);
+        });
+      });
+    </script>
+  </body>
+</html>
